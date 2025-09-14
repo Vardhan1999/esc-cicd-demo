@@ -1,0 +1,42 @@
+name: "Mern-App"
+
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:8.0.3
+    volumes:
+      - mongodbdata:/data/db
+    env_file:
+      - ./env/mongo.env
+    networks:
+      - db-net
+
+  api:
+    container_name: nodeapp
+    depends_on:
+      - mongodb
+    build:
+      context: ./API-jokes
+      dockerfile: Dockerfile
+    image: node-api-image
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./env/server.env
+    networks:
+      - db-net
+      - server-net
+    develop:
+      watch:
+        - path: ./API-jokes
+          action: sync
+          target: /app
+          ignore:
+            - node_modules
+
+volumes:
+  mongodbdata:
+
+networks:
+  db-net:
+  server-net:
